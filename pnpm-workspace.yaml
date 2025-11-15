@@ -1,0 +1,2 @@
+packages:
+  - 'src/renderer/src/components/vue-form-craft/*'
