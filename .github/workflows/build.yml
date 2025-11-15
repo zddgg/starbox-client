@@ -13,7 +13,7 @@ jobs:
   build-client:
     strategy:
       matrix:
-        os: [ macos-latest, ubuntu-latest, windows-latest ]
+        os: [ macos-latest, ubuntu-20.04, windows-latest ]
         include:
           - os: macos-latest
             platform: mac
@@ -102,7 +102,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Package application (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-20.04'
         run: pnpm exec electron-builder --linux --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -124,7 +124,7 @@ jobs:
           retention-days: 1
 
       - name: Upload artifacts (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-20.04'
         uses: actions/upload-artifact@v4
         with:
           name: starbox-client-linux
@@ -148,13 +148,13 @@ jobs:
   build-embedded:
     strategy:
       matrix:
-        os: [ macos-latest, ubuntu-latest, windows-latest ]
+        os: [ macos-latest, ubuntu-20.04, windows-latest ]
         include:
           - os: macos-latest
             platform: macos
             python_cmd: python3
             server_ext: ''
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             platform: linux
             python_cmd: python3
             server_ext: ''
@@ -274,9 +274,9 @@ jobs:
           retention-days: 1
 
   release:
-    needs: [build-client, build-embedded]
+    needs: [ build-client, build-embedded ]
     if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Download all artifacts
