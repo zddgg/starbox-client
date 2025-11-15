@@ -18,7 +18,7 @@ jobs:
           - os: macos-latest
             platform: mac
             python_cmd: python3
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             platform: linux
             python_cmd: python3
           - os: windows-latest
@@ -232,7 +232,7 @@ jobs:
         run: |
           cd src/renderer
           pnpm run build:embedded
-          
+
       - name: Copy webui to server static
         shell: bash
         run: |
@@ -311,21 +311,21 @@ jobs:
           generate_release_notes: true
           body: |
             ## 下载说明
-            
+
             ### Electron 桌面客户端
             - **Windows**: 下载 `starbox-client-*-setup.exe`
             - **macOS**: 下载 `starbox-client-*.dmg`
             - **Linux**: 下载 `starbox-client-*.AppImage` 或 `starbox-client-*.deb`
-            
+
             ### Embedded 完整版（包含 Web UI）
             - **Windows**: 下载 `starbox-embedded-windows-v*.exe`
             - **macOS**: 下载 `starbox-embedded-macos-v*`
             - **Linux**: 下载 `starbox-embedded-linux-v*`
-            
+
             Embedded 版本是独立的可执行文件，内置了完整的 Web UI 和后端服务，无需安装即可运行。
-            
+
             ## 更新日志
-            
+
             查看下方自动生成的更新内容
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
