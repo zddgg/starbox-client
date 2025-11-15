@@ -1,0 +1,331 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-client:
+    strategy:
+      matrix:
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
+        include:
+          - os: macos-latest
+            platform: mac
+            python_cmd: python3
+          - os: ubuntu-latest
+            platform: linux
+            python_cmd: python3
+          - os: windows-latest
+            platform: win
+            python_cmd: python
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'src/server/requirements.txt'
+
+      - name: Setup MSVC (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install Python dependencies
+        run: |
+          ${{ matrix.python_cmd }} -m pip install --upgrade pip
+          ${{ matrix.python_cmd }} -m pip install -r src/server/requirements.txt
+
+      - name: Install Node dependencies
+        run: pnpm install
+
+      - name: Clean build directories
+        shell: bash
+        run: |
+          rm -rf dist out src/server/dist src/server/build
+          echo "✅ Cleaned build directories"
+
+      - name: Build Python server
+        run: pnpm run build:server
+
+      - name: Build Electron app
+        run: pnpm run build
+
+      - name: Copy loading.html
+        shell: bash
+        run: |
+          mkdir -p out/renderer
+          cp src/renderer/loading.html out/renderer/
+
+      - name: Package application (macOS)
+        if: matrix.os == 'macos-latest'
+        run: pnpm exec electron-builder --mac --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package application (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: pnpm exec electron-builder --linux --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package application (Windows)
+        if: matrix.os == 'windows-latest'
+        run: pnpm exec electron-builder --win --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: starbox-client-macos
+          path: |
+            dist/*.dmg
+            dist/latest*.yml
+          retention-days: 1
+
+      - name: Upload artifacts (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: starbox-client-linux
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.snap
+            dist/latest*.yml
+          retention-days: 1
+
+      - name: Upload artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: starbox-client-windows
+          path: |
+            dist/*.exe
+            dist/latest*.yml
+          retention-days: 1
+
+  build-embedded:
+    strategy:
+      matrix:
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
+        include:
+          - os: macos-latest
+            platform: macos
+            python_cmd: python3
+            server_ext: ''
+          - os: ubuntu-latest
+            platform: linux
+            python_cmd: python3
+            server_ext: ''
+          - os: windows-latest
+            platform: windows
+            python_cmd: python
+            server_ext: '.exe'
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'src/server/requirements.txt'
+
+      - name: Setup MSVC (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install Python dependencies
+        run: |
+          ${{ matrix.python_cmd }} -m pip install --upgrade pip
+          ${{ matrix.python_cmd }} -m pip install -r src/server/requirements.txt
+
+      - name: Install root dependencies (for build scripts)
+        run: pnpm install
+
+      - name: Install renderer dependencies
+        shell: bash
+        run: |
+          cd src/renderer
+          pnpm install
+
+      - name: Clean build directories
+        shell: bash
+        run: |
+          rm -rf src/renderer/dist src/server/dist src/server/build src/server/static
+          echo "✅ Cleaned build directories"
+
+      - name: Build embedded webui
+        shell: bash
+        run: |
+          cd src/renderer
+          pnpm run build:embedded
+          
+      - name: Copy webui to server static
+        shell: bash
+        run: |
+          mkdir -p src/server/static
+          cp -r src/renderer/dist/* src/server/static/
+          echo "✅ Copied webui to src/server/static/"
+          ls -la src/server/static/
+
+      - name: Build Python server (embedded)
+        run: pnpm run build:server
+
+      - name: Get version from package.json
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Package version: $VERSION"
+
+      - name: Rename Python server with platform suffix and version
+        shell: bash
+        run: |
+          cd src/server/dist
+          VERSION="${{ steps.version.outputs.version }}"
+          if [ -f "starbox-server${{ matrix.server_ext }}" ]; then
+            mv starbox-server${{ matrix.server_ext }} starbox-embedded-${{ matrix.platform }}-v${VERSION}${{ matrix.server_ext }}
+            echo "✅ Renamed to: starbox-embedded-${{ matrix.platform }}-v${VERSION}${{ matrix.server_ext }}"
+          else
+            echo "❌ Error: starbox-server${{ matrix.server_ext }} not found"
+            exit 1
+          fi
+
+      - name: Upload embedded artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: starbox-embedded-${{ matrix.platform }}
+          path: |
+            src/server/dist/starbox-embedded-${{ matrix.platform }}-v*
+          retention-days: 1
+
+  release:
+    needs: [build-client, build-embedded]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Check if prerelease
+        id: prerelease
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          if [[ "$TAG" =~ -(alpha|beta|rc|preview|pre) ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "This is a prerelease: $TAG"
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            echo "This is a stable release: $TAG"
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/starbox-client-macos/*
+            artifacts/starbox-client-linux/*
+            artifacts/starbox-client-windows/*
+            artifacts/starbox-embedded-macos/*
+            artifacts/starbox-embedded-linux/*
+            artifacts/starbox-embedded-windows/*
+          draft: false
+          prerelease: ${{ steps.prerelease.outputs.is_prerelease }}
+          generate_release_notes: true
+          body: |
+            ## 下载说明
+            
+            ### Electron 桌面客户端
+            - **Windows**: 下载 `starbox-client-*-setup.exe`
+            - **macOS**: 下载 `starbox-client-*.dmg`
+            - **Linux**: 下载 `starbox-client-*.AppImage` 或 `starbox-client-*.deb`
+            
+            ### Embedded 完整版（包含 Web UI）
+            - **Windows**: 下载 `starbox-embedded-windows-v*.exe`
+            - **macOS**: 下载 `starbox-embedded-macos-v*`
+            - **Linux**: 下载 `starbox-embedded-linux-v*`
+            
+            Embedded 版本是独立的可执行文件，内置了完整的 Web UI 和后端服务，无需安装即可运行。
+            
+            ## 更新日志
+            
+            查看下方自动生成的更新内容
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

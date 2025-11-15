@@ -1,0 +1,23 @@
+name: Cleanup Old Workflows
+
+on:
+  schedule:
+    # 每周日凌晨 2 点运行
+    - cron: '0 2 * * 0'
+  workflow_dispatch:  # 也可以手动触发
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 30  # 保留最近 30 天的
+          keep_minimum_runs: 5  # 至少保留最近 5 次运行

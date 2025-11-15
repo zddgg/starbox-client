@@ -1,8 +1,8 @@
 [submodule "src/renderer"]
 	path = src/renderer
 	url = https://github.com/zddgg/starbox-webui.git
-	branch = dev
+	branch = main
 [submodule "src/server"]
 	path = src/server
 	url = https://github.com/zddgg/starbox-server.git
-	branch = dev
+	branch = main
