@@ -258,8 +258,8 @@ jobs:
           cd src/server/dist
           VERSION="${{ steps.version.outputs.version }}"
           if [ -f "starbox-server${{ matrix.server_ext }}" ]; then
-            mv starbox-server${{ matrix.server_ext }} starbox-embedded-${{ matrix.platform }}-v${VERSION}${{ matrix.server_ext }}
-            echo "✅ Renamed to: starbox-embedded-${{ matrix.platform }}-v${VERSION}${{ matrix.server_ext }}"
+            mv starbox-server${{ matrix.server_ext }} starbox-embedded-${{ matrix.platform }}-${VERSION}${{ matrix.server_ext }}
+            echo "✅ Renamed to: starbox-embedded-${{ matrix.platform }}-${VERSION}${{ matrix.server_ext }}"
           else
             echo "❌ Error: starbox-server${{ matrix.server_ext }} not found"
             exit 1
@@ -270,7 +270,7 @@ jobs:
         with:
           name: starbox-embedded-${{ matrix.platform }}
           path: |
-            src/server/dist/starbox-embedded-${{ matrix.platform }}-v*
+            src/server/dist/starbox-embedded-${{ matrix.platform }}-*
           retention-days: 1
 
   release:
@@ -318,9 +318,9 @@ jobs:
             - **Linux**: 下载 `starbox-client-*.AppImage` 或 `starbox-client-*.deb`
 
             ### Embedded 完整版（包含 Web UI）
-            - **Windows**: 下载 `starbox-embedded-windows-v*.exe`
-            - **macOS**: 下载 `starbox-embedded-macos-v*`
-            - **Linux**: 下载 `starbox-embedded-linux-v*`
+            - **Windows**: 下载 `starbox-embedded-windows-*.exe`
+            - **macOS**: 下载 `starbox-embedded-macos-*`
+            - **Linux**: 下载 `starbox-embedded-linux-*`
 
             Embedded 版本是独立的可执行文件，内置了完整的 Web UI 和后端服务，无需安装即可运行。
 
