@@ -20,6 +20,7 @@
     "build:mac": "npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux",
     "build:server": "ts-node scripts/build-server.ts",
+    "build:server:console": "ts-node scripts/build-server.ts --console",
     "build:app:win": "ts-node scripts/build-app.ts win",
     "build:app:mac": "ts-node scripts/build-app.ts mac",
     "build:app:linux": "ts-node scripts/build-app.ts linux",

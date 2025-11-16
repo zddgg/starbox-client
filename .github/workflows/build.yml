@@ -242,7 +242,13 @@ jobs:
           ls -la src/server/static/
 
       - name: Build Python server (embedded)
-        run: pnpm run build:server
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            pnpm run build:server:console
+          else
+            pnpm run build:server
+          fi
 
       - name: Get version from package.json
         id: version

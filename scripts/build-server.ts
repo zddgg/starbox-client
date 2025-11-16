@@ -10,9 +10,10 @@ const platform = process.platform
 
 /**
  * 构建Python后端服务
+ * @param showConsole 是否显示控制台窗口（仅Windows）
  * @returns {Promise<string>} 打包后的可执行文件路径
  */
-export async function buildPythonServer(): Promise<string> {
+export async function buildPythonServer(showConsole: boolean = false): Promise<string> {
   console.log('开始构建Python后端服务...')
 
   // 服务端脚本路径
@@ -33,11 +34,12 @@ export async function buildPythonServer(): Promise<string> {
 
     // 根据不同平台执行不同的命令
     let buildCommand: string
+    const consoleFlag = showConsole ? ' --console' : ''
 
     if (platform === 'win32') {
-      buildCommand = 'python scripts/build.py'
+      buildCommand = `python scripts/build.py${consoleFlag}`
     } else if (platform === 'darwin' || platform === 'linux') {
-      buildCommand = 'python3 scripts/build.py'
+      buildCommand = `python3 scripts/build.py${consoleFlag}`
     } else {
       throw new Error(`不支持的平台: ${platform}`)
     }
@@ -79,7 +81,10 @@ export async function buildPythonServer(): Promise<string> {
 
 // 如果直接执行此脚本，则运行构建
 if (require.main === module) {
-  buildPythonServer().catch((error) => {
+  // 解析命令行参数
+  const showConsole = process.argv.includes('--console')
+  
+  buildPythonServer(showConsole).catch((error) => {
     console.error(error)
     process.exit(1)
   })
