@@ -244,7 +244,7 @@ const electronAPI2 = {
       fs.writeFileSync(configPath, yaml.stringify(config), 'utf8')
 
       // 通知主进程重启后端服务
-      ipcRenderer.invoke('restart-backend-server')
+      ipcRenderer.invoke('restart-app')
 
       return finalDir
     } catch {

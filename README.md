@@ -1,34 +1,42 @@
-# starbox
+# StarBox
 
-An Electron application with Vue and TypeScript
+## AI 智能配音工具
 
-## Recommended IDE Setup
+> 让文字拥有声音，让故事更加生动。
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
+---
 
-## Project Setup
+## 🚀 快速链接 & 信息
 
-### Install
+- 🏷️ **当前版本**: `v1.3.1`
+- 👀 [在线预览](https://starbox.wsudo.com)
+- 📖 [项目文档](https://docs.starbox.wsudo.com)
 
-```bash
-$ pnpm install
-```
+---
 
-### Development
+## 🐳 镜像信息
 
-```bash
-$ pnpm dev
-```
+- StarBox WebUI
+- IndexTTS-2
 
-### Build
+---
 
-```bash
-# For windows
-$ pnpm build:win
+## ✨ 核心功能
 
-# For macOS
-$ pnpm build:mac
+- **🔌 插件化架构**
+  - AI 音频生成插件化设计，轻松接入主流开源 TTS 模型，支持自定义扩展。
 
-# For Linux
-$ pnpm build:linux
-```
+- **🎙 多发音人配置**
+  - 支持多发音人管理，每个发音人可配置多种风格，满足不同场景需求。
+
+- **🤖 AI 智能分析**
+  - 通过大语言模型自动分析小说角色和对话情感，智能匹配发音人和语音风格。
+
+- **🎛️ SSML 编辑器**
+  - 专业的 SSML 编辑界面，可视化标记音频参数，精确控制语音效果。
+
+- **✂️ 音频编辑**
+  - 内置音频裁剪功能，支持自定义处理音频位置，灵活调整生成结果。
+
+- **🛠 灵活配置**
+  - 支持主流 LLM 配置（OpenAI 格式），提示词模板可自定义，适配各种需求。

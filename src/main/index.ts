@@ -146,14 +146,14 @@ function createTray(): void {
         if (appState.isQuittingProcessed) {
           return;
         }
-        
+
         // 标记应用正在退出
         appState.isQuitting = true
         // 标记已处理退出清理
         appState.isQuittingProcessed = true
-        
+
         log.info('托盘菜单触发退出: 正在关闭应用...')
-        
+
         if (serverManager.isRunning()) {
           try {
             log.info('托盘菜单退出: 正在关闭后端服务...')
@@ -164,7 +164,7 @@ function createTray(): void {
             await serverManager.cleanupOldProcesses()
           }
         }
-        
+
         // 确保有足够时间让服务关闭后再退出应用
         setTimeout(() => app.quit(), 300)
       }
@@ -430,6 +430,37 @@ function setupIPC(): void {
     }
   })
 
+  // 重启APP
+  app.whenReady().then(() => {
+    // 监听重启事件
+    ipcMain.handle('restart-app', async () => {
+      try {
+        log.info('收到重启应用请求，正在关闭后端服务...')
+        
+        // 标记应用正在退出
+        appState.isQuitting = true
+        
+        // 先停止后端服务
+        if (serverManager.isRunning()) {
+          await serverManager.stop()
+          // 等待服务完全停止
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+        }
+        
+        log.info('后端服务已关闭，准备重启应用...')
+        
+        // 重启应用（不需要特殊参数，因为正常启动流程会自动初始化）
+        app.relaunch()
+        app.exit(0)
+      } catch (error) {
+        log.error('重启应用时出错:', error)
+        // 即使出错也尝试重启
+        app.relaunch()
+        app.exit(0)
+      }
+    })
+  })
+
   // 自动更新相关
   ipcMain.handle('check-for-update', async () => {
     // 对所有平台都设置autoDownload为false，让用户自行决定是否下载
@@ -518,14 +549,14 @@ app.on('before-quit', async (event) => {
     try {
       // 阻止应用退出，直到后端服务完全关闭
       event.preventDefault()
-      
+
       // 尝试停止服务
       const stopped = await serverManager.stop()
-      
+
       if (!stopped) {
         log.warn('无法正常关闭后端服务，可能需要手动清理进程')
       }
-      
+
       // 退出应用，没有阻止事件
       setTimeout(() => app.quit(), 500)
     } catch (err) {
