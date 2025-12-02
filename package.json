@@ -1,6 +1,6 @@
 {
   "name": "starbox",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "An Electron application with Vue and TypeScript",
   "main": "./out/main/index.js",
   "author": "com.wsudo.starbox",
@@ -67,7 +67,7 @@
     "@vue-form-craft/utils": "workspace:*",
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.7.0",
-    "electron": "^39.2.4",
+    "electron": "^38.7.2",
     "electron-builder": "^26.0.12",
     "electron-icon-builder": "^2.0.1",
     "electron-updater": "^6.6.2",
