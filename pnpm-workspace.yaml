@@ -1,2 +1,7 @@
-packages:
-  - 'src/renderer/src/components/vue-form-craft/*'
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - electron
+  - electron-winstaller
+  - esbuild
+  - phantomjs-prebuilt
+  - vue-demi

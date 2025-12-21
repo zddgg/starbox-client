@@ -13,6 +13,9 @@
       "@renderer/*": [
         "src/renderer/src/*"
       ],
+      "@dynamic-form/*": [
+        "src/renderer/src/components/dynamic-form/*"
+      ],
       "@/*": [
         "src/renderer/src/*"
       ]
