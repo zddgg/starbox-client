@@ -1,5 +1,6 @@
 import { dialog, BrowserWindow, shell } from 'electron'
 import { app } from 'electron'
+import path from 'path'
 
 /**
  * 选择单个文件
@@ -25,7 +26,7 @@ export async function selectFile(
       | 'dontAddToRecent'
     >
   } = {}
-): Promise<string | null> {
+): Promise<{ filePath: string; fileName: string } | null> {
   // 设置默认选项
   const defaultOptions = {
     title: '选择文件',
@@ -48,7 +49,13 @@ export async function selectFile(
     }
 
     // 返回选中的文件路径
-    return filePaths[0]
+    const filePath = filePaths[0]
+    const fileName = path.basename(filePath)
+
+    return {
+      filePath: filePath,
+      fileName: fileName
+    }
   } catch (error) {
     console.error('选择文件时出错:', error)
     return null
@@ -79,7 +86,7 @@ export async function selectFiles(
       | 'dontAddToRecent'
     >
   } = {}
-): Promise<string[] | null> {
+): Promise<{ filePath: string; fileName: string }[] | null> {
   // 设置默认选项
   const defaultOptions = {
     title: '选择文件',
@@ -107,7 +114,13 @@ export async function selectFiles(
     }
 
     // 返回选中的文件路径数组
-    return filePaths
+    return filePaths.map((filePath) => {
+      const fileName = path.basename(filePath)
+      return {
+        filePath: filePath,
+        fileName: fileName,
+      }
+    })
   } catch (error) {
     console.error('选择多个文件时出错:', error)
     return null

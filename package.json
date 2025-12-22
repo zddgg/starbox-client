@@ -1,6 +1,6 @@
 {
   "name": "starbox",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "StarBox",
   "main": "./out/main/index.js",
   "author": "com.wsudo.starbox",

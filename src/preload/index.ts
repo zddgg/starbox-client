@@ -128,12 +128,16 @@ const electronAPI2 = {
   // 文件系统操作API
   fileSystem: {
     // 选择单个文件
-    selectFile: async (options?: FileDialogOptions): Promise<string | null> => {
+    selectFile: async (
+      options?: FileDialogOptions
+    ): Promise<{ filePath: string; fileName: string } | null> => {
       return ipcRenderer.invoke('select-file', options)
     },
 
     // 选择多个文件
-    selectFiles: async (options?: FileDialogOptions): Promise<string[] | null> => {
+    selectFiles: async (
+      options?: FileDialogOptions
+    ): Promise<{ filePath: string; fileName: string }[] | null> => {
       return ipcRenderer.invoke('select-files', options)
     },
 
@@ -253,12 +257,15 @@ const electronAPI2 = {
   },
   checkForUpdate: () => ipcRenderer.invoke('check-for-update'),
   quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
-  onUpdateAvailable: (callback: (info: unknown) => void) => ipcRenderer.on('update-available', (_event, info) => callback(info)),
+  onUpdateAvailable: (callback: (info: unknown) => void) =>
+    ipcRenderer.on('update-available', (_event, info) => callback(info)),
   onUpdateNotAvailable: (callback: () => void) => ipcRenderer.on('update-not-available', callback),
-  onDownloadProgress: (callback: (progress: unknown) => void) => ipcRenderer.on('download-progress', (_event, progress) => callback(progress)),
+  onDownloadProgress: (callback: (progress: unknown) => void) =>
+    ipcRenderer.on('download-progress', (_event, progress) => callback(progress)),
   onUpdateDownloaded: (callback: () => void) => ipcRenderer.on('update-downloaded', callback),
   onDownloadStarted: (callback: () => void) => ipcRenderer.on('update-download-started', callback),
-  onDownloadError: (callback: (error: unknown) => void) => ipcRenderer.on('update-download-error', (_event, error) => callback(error)),
+  onDownloadError: (callback: (error: unknown) => void) =>
+    ipcRenderer.on('update-download-error', (_event, error) => callback(error)),
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   downloadUpdate: () => ipcRenderer.invoke('download-update'),
   onWindowFocus: (callback: () => void) => ipcRenderer.on('window-focused', () => callback()),
@@ -289,7 +296,7 @@ const electronAPI2 = {
     getLogFilePath: () => {
       return log.transports.file.getFile().path
     }
-  },
+  }
 }
 
 // 使用contextBridge暴露Electron API和自定义API给渲染进程
