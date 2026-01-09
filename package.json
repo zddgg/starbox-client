@@ -57,7 +57,7 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
     "electron": "^39.2.7",
-    "electron-builder": "^26.4.0",
+    "electron-builder": "^26.0.12",
     "electron-icon-builder": "^2.0.1",
     "electron-vite": "^4.0.1",
     "jsoneditor": "^10.4.2",
