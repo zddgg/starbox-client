@@ -94,7 +94,7 @@ importers:
         specifier: ^39.2.7
         version: 39.2.7
       electron-builder:
-        specifier: ^26.4.0
+        specifier: ^26.0.12
         version: 26.4.0(electron-builder-squirrel-windows@26.0.12)
       electron-icon-builder:
         specifier: ^2.0.1
