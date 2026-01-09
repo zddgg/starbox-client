@@ -1,7 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain, Tray, Menu } from 'electron'
-import { join } from 'path'
+import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
 import log from 'electron-log'
 import {
   selectFile,
@@ -13,6 +12,7 @@ import {
 } from './file-system'
 import { serverManager } from './service-manager'
 import { autoUpdater } from 'electron-updater'
+import nativeImage = Electron.nativeImage
 
 // 配置自动更新
 autoUpdater.disableDifferentialDownload = true // 禁用差异化下载，避免404错误
@@ -64,6 +64,9 @@ export { log }
 let mainWindow: BrowserWindow | null = null
 let loadingWindow: BrowserWindow | null = null
 let tray: Tray | null = null
+
+const iconPath = path.join(__dirname, '../../resources/icon.png')
+const trayIcon = nativeImage.createFromPath(iconPath)
 
 // 添加isQuitting标志
 const appState = {
@@ -134,7 +137,7 @@ function createLoadingWindow(): void {
  * 创建系统托盘图标
  */
 function createTray(): void {
-  tray = new Tray(icon)
+  tray = new Tray(trayIcon)
 
   const contextMenu = Menu.buildFromTemplate([
     { label: '显示主界面', click: () => mainWindow?.show() },
@@ -198,7 +201,6 @@ function createWindow(): void {
     minHeight: 768, // 最小高度
     show: false,
     autoHideMenuBar: true,
-    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
