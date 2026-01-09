@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, Tray, Menu } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import log from 'electron-log'
@@ -12,7 +12,6 @@ import {
 } from './file-system'
 import { serverManager } from './service-manager'
 import { autoUpdater } from 'electron-updater'
-import nativeImage = Electron.nativeImage
 
 // 配置自动更新
 autoUpdater.disableDifferentialDownload = true // 禁用差异化下载，避免404错误
@@ -66,7 +65,7 @@ let loadingWindow: BrowserWindow | null = null
 let tray: Tray | null = null
 
 const iconPath = path.join(__dirname, '../../resources/icon.png')
-const trayIcon = nativeImage.createFromPath(iconPath)
+const icon = nativeImage.createFromPath(iconPath)
 
 // 添加isQuitting标志
 const appState = {
@@ -106,6 +105,7 @@ function createLoadingWindow(): void {
   loadingWindow = new BrowserWindow({
     width: 1024,
     height: 768,
+    icon: icon,
     show: false,
     frame: false,
     resizable: false,
@@ -137,7 +137,7 @@ function createLoadingWindow(): void {
  * 创建系统托盘图标
  */
 function createTray(): void {
-  tray = new Tray(trayIcon)
+  tray = new Tray(icon)
 
   const contextMenu = Menu.buildFromTemplate([
     { label: '显示主界面', click: () => mainWindow?.show() },
@@ -147,7 +147,7 @@ function createTray(): void {
       click: async () => {
         // 使用appState.isQuittingProcessed标记避免重复处理
         if (appState.isQuittingProcessed) {
-          return;
+          return
         }
 
         // 标记应用正在退出
@@ -199,6 +199,7 @@ function createWindow(): void {
     height: 768, // 初始高度
     minWidth: 1024, // 最小宽度
     minHeight: 768, // 最小高度
+    icon: icon,
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
@@ -438,19 +439,19 @@ function setupIPC(): void {
     ipcMain.handle('restart-app', async () => {
       try {
         log.info('收到重启应用请求，正在关闭后端服务...')
-        
+
         // 标记应用正在退出
         appState.isQuitting = true
-        
+
         // 先停止后端服务
         if (serverManager.isRunning()) {
           await serverManager.stop()
           // 等待服务完全停止
           await new Promise((resolve) => setTimeout(resolve, 1000))
         }
-        
+
         log.info('后端服务已关闭，准备重启应用...')
-        
+
         // 重启应用（不需要特殊参数，因为正常启动流程会自动初始化）
         app.relaunch()
         app.exit(0)
@@ -536,7 +537,7 @@ async function initApp(): Promise<void> {
 app.on('before-quit', async (event) => {
   // 如果已经标记为正在退出，则不重复处理
   if (appState.isQuittingProcessed) {
-    return;
+    return
   }
 
   log.info('应用退出，正在关闭后端服务...')
