@@ -4,7 +4,6 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import yaml from 'yaml'
-import fse from 'fs-extra'
 import log from 'electron-log'
 
 // 定义允许的IPC通道类型
@@ -217,42 +216,6 @@ const electronAPI2 = {
       return basePath
     } catch {
       return '读取失败'
-    }
-  },
-  // 新增：写入 config.yaml
-  setDataBaseDir: (dir: string): string | null => {
-    try {
-      const home = os.homedir()
-      const configPath = path.join(home, '.starbox', 'config.yaml')
-      let config = {}
-      if (fs.existsSync(configPath)) {
-        const content = fs.readFileSync(configPath, 'utf8')
-        config = yaml.parse(content) || {}
-      }
-      // 拼接 starbox 子目录
-      const finalDir = path.join(dir, 'starbox')
-
-      // 获取旧的数据目录
-      const oldBasePath = config['DATA_BASE_DIR'] || path.join(home, 'starbox')
-      // 复制数据到新目录
-      if (fs.existsSync(oldBasePath) && oldBasePath !== finalDir) {
-        try {
-          fse.copySync(oldBasePath, finalDir, { overwrite: true })
-        } catch {
-          // 复制失败也继续写入新路径
-        }
-      }
-
-      config['DATA_BASE_DIR'] = finalDir
-      fs.mkdirSync(path.dirname(configPath), { recursive: true })
-      fs.writeFileSync(configPath, yaml.stringify(config), 'utf8')
-
-      // 通知主进程重启后端服务
-      ipcRenderer.invoke('restart-app')
-
-      return finalDir
-    } catch {
-      return null
     }
   },
   checkForUpdate: () => ipcRenderer.invoke('check-for-update'),
