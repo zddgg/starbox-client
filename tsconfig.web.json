@@ -8,16 +8,15 @@
   ],
   "compilerOptions": {
     "composite": true,
-    "baseUrl": ".",
     "paths": {
       "@renderer/*": [
-        "src/renderer/src/*"
+        "./src/renderer/src/*"
       ],
       "@dynamic-form/*": [
-        "src/renderer/src/components/dynamic-form/*"
+        "./src/renderer/src/components/dynamic-form/*"
       ],
       "@/*": [
-        "src/renderer/src/*"
+        "./src/renderer/src/*"
       ]
     },
     "noUnusedLocals": false,
