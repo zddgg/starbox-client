@@ -1,8 +1,9 @@
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import { buildPythonServer } from './build-server'
-import * as fs from 'fs'
-import * as path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
+import process from 'process'
 
 const execAsync = promisify(exec)
 

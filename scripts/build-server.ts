@@ -1,6 +1,7 @@
 import { exec } from 'child_process'
-import * as path from 'path'
-import * as fs from 'fs'
+import fs from 'node:fs'
+import path from 'node:path'
+import process from 'process'
 import { promisify } from 'util'
 
 const execAsync = promisify(exec)
