@@ -2,12 +2,17 @@ import { exec } from 'child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'process'
+import { fileURLToPath } from 'node:url'
 import { promisify } from 'util'
 
 const execAsync = promisify(exec)
 
 // 获取平台信息
 const platform = process.platform
+
+// ESM 兼容的 __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 /**
  * 构建Python后端服务
@@ -81,10 +86,10 @@ export async function buildPythonServer(showConsole: boolean = false): Promise<s
 }
 
 // 如果直接执行此脚本，则运行构建
-if (require.main === module) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   // 解析命令行参数
   const showConsole = process.argv.includes('--console')
-  
+
   buildPythonServer(showConsole).catch((error) => {
     console.error(error)
     process.exit(1)

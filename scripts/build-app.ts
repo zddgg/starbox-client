@@ -4,8 +4,13 @@ import { buildPythonServer } from './build-server'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'process'
+import { fileURLToPath } from 'node:url'
 
 const execAsync = promisify(exec)
+
+// ESM 兼容的 __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 /**
  * 执行命令并打印输出
@@ -115,7 +120,7 @@ async function buildApp(platform?: string): Promise<void> {
 }
 
 // 如果直接执行此脚本
-if (require.main === module) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   // 获取命令行参数，如果有的话
   let platform = process.argv[2] // 可能是 'win', 'mac', 'linux' 或 undefined
 
@@ -123,9 +128,9 @@ if (require.main === module) {
     platform = process.platform
     if (platform === 'win32') {
       platform = 'win'
-    } else if (platform === 'darwin') {
+    } else if (process.platform === 'darwin') {
       platform = 'mac'
-    } else if (platform === 'linux') {
+    } else if (process.platform === 'linux') {
       platform = 'linux'
     }
   }
